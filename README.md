@@ -12,6 +12,8 @@
 
 ● Application can be used in landscape or portrait mode.
 
+![example](example-screen.png)
+
 ## Hints
 You should think of it as a larger, expandable team project, with more features, views and components being added in the future. In other words, try to express your thinking about the broader project architecture, but only include the code/assets relevant to the requirements.
 
