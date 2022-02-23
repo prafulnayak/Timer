@@ -48,7 +48,7 @@ class TimerServiceTest {
             service?.timerLiveList?.observeForever { }
             val list = service?.timerLiveList?.value
             Assert.assertNotNull(list)
-            service?.stopService()
+            service?.stopRunning()
             service?.let { Assert.assertFalse(it.getRunningStatus()) }
 
         }

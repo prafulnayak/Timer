@@ -53,6 +53,10 @@ class TimerService : Service(), CoroutineScope {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         setTimerData(intent)
+        if(!isRunning){
+            runTimer()
+            isRunning = true
+        }
         return START_NOT_STICKY
     }
 
@@ -69,7 +73,8 @@ class TimerService : Service(), CoroutineScope {
                 }
             }
             if (!isRunning) {
-                stopService()
+                stopRunning()
+                stopSelf()
             }
         }
     }
@@ -87,16 +92,24 @@ class TimerService : Service(), CoroutineScope {
 
                 override fun onFinish() {
                     timerLiveList.value?.find { it.id == timerData.id }.apply {
-                        this?.time = 0
+                        this?.time = 0L
                     }
                     timerLiveList.postValue(timerLiveList.value)
+                    checkIfAnyCountDownTimerLeft()
                 }
             }.start()
         })
 
     }
 
-    fun stopService() {
+    private fun checkIfAnyCountDownTimerLeft() {
+        val finishedList = timerLiveList.value?.filter { it.time == 0L }
+        if(finishedList?.size == timerLiveList.value?.size){
+            stopRunning()
+        }
+    }
+
+    fun stopRunning() {
         isRunning = false
     }
 
