@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 class MainActivityTest {
 
     @Test
-    fun testActivity(){
+    fun testActivity() {
         val scenario = ActivityScenario.launch(MainActivity::class.java)
         Assert.assertNotNull(scenario)
         scenario.close()

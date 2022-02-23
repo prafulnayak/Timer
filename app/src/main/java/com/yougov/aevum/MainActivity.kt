@@ -21,10 +21,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serviceConnection: ServiceConnection
     private var isBound = false
 
-    private fun unbindTimerService() {
-        unbindService(serviceConnection)
-    }
-
     private fun observeRunningTimerList() {
         timerService?.timerLiveList?.observe(this, Observer {
             timerAdapter.submitTimerList(it)
@@ -65,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                 binding.seconds.text.toString()
             )) ?: 0
             if (time > 1000) {
-                intent.putExtra("timer", TimerData(Random().nextInt(), time))
+                intent.putExtra(TIMER, TimerData(Random().nextInt(), time))
                 startForegroundService(intent)
             } else {
                 Toast.makeText(this, getString(R.string.wrong_input_message), Toast.LENGTH_LONG).show()
@@ -75,9 +71,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setDefaultValue() {
-        binding.hours.setText("00")
-        binding.minutes.setText("00")
-        binding.seconds.setText("00")
+        binding.hours.setText(getString(R.string.reset_value))
+        binding.minutes.setText(getString(R.string.reset_value))
+        binding.seconds.setText(getString(R.string.reset_value))
+    }
+
+    private fun unbindTimerService() {
+        unbindService(serviceConnection)
     }
 
     override fun onStop() {
@@ -86,5 +86,9 @@ class MainActivity : AppCompatActivity() {
             unbindTimerService()
             isBound = false
         }
+    }
+
+    companion object {
+        const val TIMER = "timer"
     }
 }

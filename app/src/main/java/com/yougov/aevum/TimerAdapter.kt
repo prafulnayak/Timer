@@ -44,7 +44,7 @@ class TimerAdapter() : ListAdapter<TimerData, TimerAdapter.ViewHolder>(DiffCallb
 
     @SuppressLint("NotifyDataSetChanged")
     fun submitTimerList(it: List<TimerData>) {
-        submitList(it)
+        submitList(it.reversed())
         notifyDataSetChanged()
     }
 }

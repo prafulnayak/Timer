@@ -30,7 +30,7 @@ class TimerServiceTest {
             val intent = Intent(RuntimeEnvironment.application, TimerService::class.java)
             intent.putExtra("timer", TimerData(1, 5000))
             controller!!.withIntent(intent).startCommand(0, 0)
-            service?.timerLiveList?.observeForever {  }
+            service?.timerLiveList?.observeForever { }
             val list = service?.timerLiveList?.value
             Assert.assertNotNull(list)
 
@@ -45,7 +45,7 @@ class TimerServiceTest {
             val intent = Intent(RuntimeEnvironment.application, TimerService::class.java)
             intent.putExtra("timer", TimerData(1, 5000))
             controller!!.withIntent(intent).startCommand(0, 0)
-            service?.timerLiveList?.observeForever {  }
+            service?.timerLiveList?.observeForever { }
             val list = service?.timerLiveList?.value
             Assert.assertNotNull(list)
             service?.stopService()

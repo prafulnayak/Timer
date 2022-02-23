@@ -16,4 +16,6 @@
     <string name="timer_title">Timer</string>
     <string name="timer_text">Timer Notification</string>
     <string name="wrong_input_message">Enter Right Format</string>
+    <string name="reset_value">00</string>
+    <string name="running_timer">Running Timer:</string>
 </resources>

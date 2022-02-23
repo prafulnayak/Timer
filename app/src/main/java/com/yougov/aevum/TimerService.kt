@@ -9,6 +9,7 @@ import android.os.*
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.MutableLiveData
+import com.yougov.aevum.MainActivity.Companion.TIMER
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -45,7 +46,7 @@ class TimerService : Service(), CoroutineScope {
     }
 
     private fun setTimerData(intent: Intent?) {
-        val timerData = intent?.getSerializableExtra("timer") as TimerData
+        val timerData = intent?.getSerializableExtra(TIMER) as TimerData
         timerQueue.add(timerData)
         timerLiveList.value = timerLiveList.value?.plus(timerData) ?: listOf(timerData)
     }
