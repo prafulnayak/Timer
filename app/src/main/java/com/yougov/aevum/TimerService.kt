@@ -95,7 +95,7 @@ class TimerService : Service(), CoroutineScope {
 
     }
 
-    private fun stopService() {
+    fun stopService() {
         isRunning = false
     }
 
@@ -107,5 +107,9 @@ class TimerService : Service(), CoroutineScope {
             .setContentText(getString(R.string.timer_text))
             .build()
         startForeground(222, notification)
+    }
+
+    fun getRunningStatus(): Boolean {
+        return isRunning
     }
 }

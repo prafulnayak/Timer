@@ -8,7 +8,7 @@ import org.robolectric.RobolectricTestRunner
 
 
 @RunWith(RobolectricTestRunner::class)
-class ServiceTest {
+class MainActivityTest {
 
     @Test
     fun testActivity(){

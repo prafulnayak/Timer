@@ -58,17 +58,18 @@ class MainActivity : AppCompatActivity() {
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         setDefaultValue()
         binding.start.setOnClickListener {
-            try {
-                val time = (binding.hours.text.toString().toLong() * 60 * 60 * 1000) +
-                        (binding.minutes.text.toString().toLong() * 60 * 1000) +
-                        (binding.seconds.text.toString().toLong() * 1000)
+
+            val time = (Utility.getTimeInLong(
+                binding.hours.text.toString(),
+                binding.minutes.text.toString(),
+                binding.seconds.text.toString()
+            )) ?: 0
+            if (time > 1000) {
                 intent.putExtra("timer", TimerData(Random().nextInt(), time))
                 startForegroundService(intent)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(this, "Enter Right Format", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, getString(R.string.wrong_input_message), Toast.LENGTH_LONG).show()
             }
-
             setDefaultValue()
         }
     }
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        if(isBound){
+        if (isBound) {
             unbindTimerService()
             isBound = false
         }
