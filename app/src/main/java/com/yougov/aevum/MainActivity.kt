@@ -14,22 +14,12 @@ import com.yougov.aevum.databinding.ActivityMainBinding
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var binding: ActivityMainBinding
     var timerService: TimerService? = null
     private lateinit var timerAdapter: TimerAdapter
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
-            val binder = iBinder as TimerService.MyBinder
-            timerService = binder.service
-            observeRunningTimerList()
-        }
-
-        override fun onServiceDisconnected(p0: ComponentName?) {
-            unbindTimerService()
-        }
-
-    }
+    private lateinit var serviceConnection: ServiceConnection
+    private var isBound = false
 
     private fun unbindTimerService() {
         unbindService(serviceConnection)
@@ -49,7 +39,21 @@ class MainActivity : AppCompatActivity() {
         timerAdapter = TimerAdapter()
         binding.timerRv.layoutManager = LinearLayoutManager(this)
         binding.timerRv.adapter = timerAdapter
+        serviceConnection = object : ServiceConnection {
+            override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
+                iBinder?.let {
+                    val binder = iBinder as TimerService.MyBinder
+                    timerService = binder.service
+                    isBound = true
+                    observeRunningTimerList()
+                }
+            }
 
+            override fun onServiceDisconnected(p0: ComponentName?) {
+                isBound = false
+            }
+
+        }
         val intent = Intent(this, TimerService::class.java)
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         setDefaultValue()
@@ -75,10 +79,11 @@ class MainActivity : AppCompatActivity() {
         binding.seconds.setText("00")
     }
 
-    override fun onPause() {
-        super.onPause()
-        unbindService(serviceConnection)
+    override fun onStop() {
+        super.onStop()
+        if(isBound){
+            unbindTimerService()
+            isBound = false
+        }
     }
-
-
 }

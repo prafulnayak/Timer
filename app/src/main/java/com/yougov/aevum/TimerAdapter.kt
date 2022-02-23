@@ -12,18 +12,18 @@ import androidx.recyclerview.widget.RecyclerView
 import java.util.concurrent.TimeUnit
 
 
-class TimerAdapter() : ListAdapter<TimerData, TimerAdapter.ViewHolder>(DiffCallback())  {
+class TimerAdapter() : ListAdapter<TimerData, TimerAdapter.ViewHolder>(DiffCallback()) {
 
-    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
-        fun bind(timerData: TimerData){
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(timerData: TimerData) {
             itemView.findViewById<TextView>(R.id.timerText).text = timerData.convertSecondsToHMmSs()
-            Log.d("test","${timerData.time}")
+            Log.d("test", "${timerData.time}")
         }
     }
 
-    class DiffCallback: DiffUtil.ItemCallback<TimerData>() {
+    class DiffCallback : DiffUtil.ItemCallback<TimerData>() {
         override fun areItemsTheSame(oldItem: TimerData, newItem: TimerData): Boolean {
-           return oldItem.id == newItem.id
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: TimerData, newItem: TimerData): Boolean {

@@ -4,11 +4,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.os.*
-import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,23 +17,22 @@ import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 
-class TimerService: Service(), CoroutineScope {
+class TimerService : Service(), CoroutineScope {
     private val job: Job by lazy { Job() }
     override val coroutineContext: CoroutineContext
-        get() = job +Dispatchers.Default
+        get() = job + Dispatchers.Default
 
-    private val CHANNEL_ID = "Timer Notification"
+    private val CHANNEL_ID = "Timer_Notification"
     private var isRunning: Boolean = true
-    private val timerQueue:Queue<TimerData> = LinkedList<TimerData>()
-    private val listTimer = mutableListOf<TimerData>()
+    private val timerQueue: Queue<TimerData> = LinkedList<TimerData>()
 
-    inner class MyBinder : Binder(){
-        val service:TimerService
+    inner class MyBinder : Binder() {
+        val service: TimerService
             get() = this@TimerService
     }
 
     private val binder: IBinder = MyBinder()
-    val timerLiveList : MutableLiveData<List<TimerData>> = MutableLiveData()
+    val timerLiveList: MutableLiveData<List<TimerData>> = MutableLiveData()
 
     override fun onCreate() {
         super.onCreate()
@@ -59,8 +57,8 @@ class TimerService: Service(), CoroutineScope {
 
     private fun runTimer() {
         CoroutineScope(Dispatchers.IO).launch {
-            while (isRunning){
-                if(!timerQueue.isEmpty()){
+            while (isRunning) {
+                if (!timerQueue.isEmpty()) {
                     val timerData = timerQueue.poll()
                     launch {
                         timerData?.let {
@@ -69,7 +67,7 @@ class TimerService: Service(), CoroutineScope {
                     }
                 }
             }
-            if(!isRunning){
+            if (!isRunning) {
                 stopService()
             }
         }
@@ -97,17 +95,17 @@ class TimerService: Service(), CoroutineScope {
 
     }
 
-    private fun stopService(){
+    private fun stopService() {
         isRunning = false
     }
 
     private fun startNotification() {
-        val channel = NotificationChannel(CHANNEL_ID, "Timer", NotificationManager.IMPORTANCE_HIGH)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-        val notification:Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Timer Notification")
-            .setContentText("Timer Running").build()
-
-        startForeground(111, notification)
+        val channel = NotificationChannel(CHANNEL_ID, CHANNEL_ID, NotificationManager.IMPORTANCE_HIGH)
+        NotificationManagerCompat.from(this).createNotificationChannel(channel)
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.timer_title))
+            .setContentText(getString(R.string.timer_text))
+            .build()
+        startForeground(222, notification)
     }
 }
