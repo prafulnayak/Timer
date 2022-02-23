@@ -1,123 +1,84 @@
 package com.yougov.aevum
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
-import androidx.activity.compose.setContent
+import android.os.IBinder
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Arrangement.spacedBy
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.yougov.aevum.databinding.ActivityMainBinding
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var binding: ActivityMainBinding
+    var timerService: TimerService? = null
+    private lateinit var timerAdapter: TimerAdapter
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(p0: ComponentName?, iBinder: IBinder?) {
+            val binder = iBinder as TimerService.MyBinder
+            timerService = binder.service
+            observeRunningTimerList()
+        }
+
+        override fun onServiceDisconnected(p0: ComponentName?) {
+            unbindTimerService()
+        }
+
+    }
+
+    private fun unbindTimerService() {
+        unbindService(serviceConnection)
+    }
+
+    private fun observeRunningTimerList() {
+        timerService?.timerLiveList?.observe(this, Observer {
+            timerAdapter.submitTimerList(it)
+        })
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            TimersScreen(emptyList())
-        }
-    }
-}
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-@Composable
-fun TimersScreen(timers: List<Time>) {
-    Surface {
-        Column(modifier = Modifier.padding(16.dp)) {
-            NewTimer()
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Running timers:")
-            Spacer(modifier = Modifier.height(8.dp))
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(timers) { timer ->
-                    Divider()
-                    Timer(timer.value)
-                }
+        timerAdapter = TimerAdapter()
+        binding.timerRv.layoutManager = LinearLayoutManager(this)
+        binding.timerRv.adapter = timerAdapter
+
+        val intent = Intent(this, TimerService::class.java)
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        setDefaultValue()
+        binding.start.setOnClickListener {
+            try {
+                val time = (binding.hours.text.toString().toLong() * 60 * 60 * 1000) +
+                        (binding.minutes.text.toString().toLong() * 60 * 1000) +
+                        (binding.seconds.text.toString().toLong() * 1000)
+                intent.putExtra("timer", TimerData(Random().nextInt(), time))
+                startForegroundService(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(this, "Enter Right Format", Toast.LENGTH_LONG).show()
             }
 
+            setDefaultValue()
         }
     }
-}
 
-@Composable
-fun NewTimer() {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
-        TimeInput(placeholderText = "hours", modifier = Modifier.weight(1f))
-        TimeInput(placeholderText = "minutes", modifier = Modifier.weight(1f))
-        TimeInput(placeholderText = "seconds", modifier = Modifier.weight(1f))
-        Button(
-            onClick = {},
-            modifier = Modifier.weight(1f)
-        ) {
-            Text("Start!")
-        }
+    private fun setDefaultValue() {
+        binding.hours.setText("00")
+        binding.minutes.setText("00")
+        binding.seconds.setText("00")
     }
+
+    override fun onPause() {
+        super.onPause()
+        unbindService(serviceConnection)
+    }
+
+
 }
-
-@Composable
-fun TimeInput(placeholderText: String, modifier: Modifier = Modifier) {
-    var input by remember { mutableStateOf("") }
-    TextField(
-        value = input,
-        onValueChange = { input = it },
-        placeholder = {
-            Text(
-                text = placeholderText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = TextStyle(fontSize = 10.sp)
-            )
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
-fun Timer(value: String) {
-    Text(text = value, style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium), modifier = Modifier.padding(vertical = 16.dp))
-}
-
-@Preview
-@Composable
-fun PreviewTimeInput() {
-    TimeInput(placeholderText = "seconds")
-}
-
-@Preview
-@Composable
-fun PreviewTimers() {
-    TimersScreen(listOf(Time("03:23:14"), Time("00:00:11")))
-}
-
-@Preview
-@Composable
-fun PreviewTimersEmpty() {
-    TimersScreen(emptyList())
-}
-
-
-@Preview
-@Composable
-fun PreviewTimer() {
-    Timer("03:23:14")
-}
-
-@Preview
-@Composable
-fun PreviewNewTimer() {
-    NewTimer()
-}
-
-data class Time(val value: String)
